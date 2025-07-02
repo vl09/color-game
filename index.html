@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Color Flash Reaction Game</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            overflow: hidden;
+        }
+
+        #root {
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        const { useState, useEffect, useRef } = React;
+
+        // Icon components
+        const PlayIcon = () => React.createElement('svg', {
+            width: "20",
+            height: "20",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+        }, React.createElement('polygon', { points: "5,3 19,12 5,21" }));
+
+        const PauseIcon = () => React.createElement('svg', {
+            width: "20",
+            height: "20",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+        }, [
+            React.createElement('rect', { key: 1, x: "6", y: "4", width: "4", height: "16" }),
+            React.createElement('rect', { key: 2, x: "14", y: "4", width: "4", height: "16" })
+        ]);
+
+        const SettingsIcon = () => React.createElement('svg', {
+            width: "20",
+            height: "20",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+        }, [
+            React.createElement('path', { 
+                key: 1, 
+                d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" 
+            }),
+            React.createElement('circle', { key: 2, cx: "12", cy: "12", r: "3" })
+        ]);
+
+        const RotateCcwIcon = () => React.createElement('svg', {
+            width: "20",
+            height: "20",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+        }, [
+            React.createElement('polyline', { key: 1, points: "1,4 1,10 7,10" }),
+            React.createElement('path', { key: 2, d: "M3.51 15a9 9 0 1 0 2.13-9.36L1 10" })
+        ]);
+
+        const CheckIcon = ({ size = 16, className = "" }) => React.createElement('svg', {
+            width: size,
+            height: size,
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            className: className
+        }, React.createElement('polyline', { points: "20,6 9,17 4,12" }));
+
+        const ColorFlashGame = () => {
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [showColor, setShowColor] = useState(false);
+            const [currentColor, setCurrentColor] = useState('#ff0000');
+            const [isCorrectColor, setIsCorrectColor] = useState(true);
+            const [score, setScore] = useState(0);
+            const [missed, setMissed] = useState(0);
+            const [wrongTaps, setWrongTaps] = useState(0);
+            const [showSettings, setShowSettings] = useState(false);
+            
+            // Settings
+            const [intervalTimeBase, setIntervalTimeBase] = useState(3000);
+            const [intervalVariation, setIntervalVariation] = useState(1000);
+            const [displayTimeBase, setDisplayTimeBase] = useState(2000);
+            const [displayVariation, setDisplayVariation] = useState(500);
+            
+            // Color selection
+            const [availableColors, setAvailableColors] = useState([
+                '#ff0000', '#00ff00', '#0000ff', '#ffff00'
+            ]);
+            const [correctColors, setCorrectColors] = useState(['#00ff00', '#0000ff']);
+            
+            const gameIntervalRef = useRef(null);
+            const colorTimeoutRef = useRef(null);
+            const nextColorTimeoutRef = useRef(null);
+            
+            const allColors = [
+                { color: '#ff0000', name: 'Red' },
+                { color: '#00ff00', name: 'Green' },
+                { color: '#0000ff', name: 'Blue' },
+                { color: '#ffff00', name: 'Yellow' },
+                { color: '#ff00ff', name: 'Magenta' },
+                { color: '#00ffff', name: 'Cyan' },
+                { color: '#ff8000', name: 'Orange' },
+                { color: '#8000ff', name: 'Purple' },
+                { color: '#ff0080', name: 'Pink' },
+                { color: '#80ff00', name: 'Lime' },
+                { color: '#0080ff', name: 'Sky Blue' },
+                { color: '#ff8080', name: 'Light Red' }
+            ];
+            
+            useEffect(() => {
+                let lastTouchEnd = 0;
+                const preventDefault = (e) => {
+                    const now = new Date().getTime();
+                    if (now - lastTouchEnd <= 300) {
+                        e.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                };
+                document.addEventListener('touchend', preventDefault, false);
+                
+                return () => {
+                    document.removeEventListener('touchend', preventDefault, false);
+                };
+            }, []);
+            
+            const getRandomVariation = (base, variation) => {
+                const min = base - variation / 2;
+                const max = base + variation / 2;
+                return Math.max(500, Math.random() * (max - min) + min);
+            };
+            
+            const getRandomColor = () => {
+                return availableColors[Math.floor(Math.random() * availableColors.length)];
+            };
+            
+            const showNewColor = () => {
+                const newColor = getRandomColor();
+                const isCorrect = correctColors.includes(newColor);
+                setCurrentColor(newColor);
+                setIsCorrectColor(isCorrect);
+                setShowColor(true);
+                
+                const displayTime = getRandomVariation(displayTimeBase, displayVariation);
+                
+                colorTimeoutRef.current = setTimeout(() => {
+                    setShowColor(false);
+                    if (isCorrect) {
+                        setMissed(prev => prev + 1);
+                    }
+                    
+                    nextColorTimeoutRef.current = setTimeout(() => {
+                        scheduleNextColor();
+                    }, 500);
+                }, displayTime);
+            };
+            
+            const scheduleNextColor = () => {
+                const nextInterval = getRandomVariation(intervalTimeBase, intervalVariation);
+                gameIntervalRef.current = setTimeout(() => {
+                    showNewColor();
+                }, nextInterval);
+            };
+            
+            const startGame = () => {
+                setIsPlaying(true);
+                setScore(0);
+                setMissed(0);
+                setWrongTaps(0);
+                
+                setTimeout(() => {
+                    showNewColor();
+                }, 1000);
+            };
+            
+            const stopGame = () => {
+                setIsPlaying(false);
+                setShowColor(false);
+                
+                if (gameIntervalRef.current) clearTimeout(gameIntervalRef.current);
+                if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
+                if (nextColorTimeoutRef.current) clearTimeout(nextColorTimeoutRef.current);
+            };
+            
+            const resetGame = () => {
+                stopGame();
+                setScore(0);
+                setMissed(0);
+                setWrongTaps(0);
+            };
+            
+            const handleColorTap = () => {
+                if (showColor && isPlaying) {
+                    setShowColor(false);
+                    
+                    if (isCorrectColor) {
+                        setScore(prev => prev + 1);
+                    } else {
+                        setWrongTaps(prev => prev + 1);
+                    }
+                    
+                    if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
+                    
+                    nextColorTimeoutRef.current = setTimeout(() => {
+                        scheduleNextColor();
+                    }, 500);
+                }
+            };
+            
+            const toggleColorAvailable = (color) => {
+                setAvailableColors(prev => 
+                    prev.includes(color) 
+                        ? prev.filter(c => c !== color)
+                        : [...prev, color]
+                );
+            };
+            
+            const toggleColorCorrect = (color) => {
+                setCorrectColors(prev => 
+                    prev.includes(color) 
+                        ? prev.filter(c => c !== color)
+                        : [...prev, color]
+                );
+            };
+            
+            useEffect(() => {
+                return () => {
+                    if (gameIntervalRef.current) clearTimeout(gameIntervalRef.current);
+                    if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
+                    if (nextColorTimeoutRef.current) clearTimeout(nextColorTimeoutRef.current);
+                };
+            }, []);
+
+            return React.createElement('div', {
+                className: "min-h-screen bg-black text-white flex flex-col",
+                style: {
+                    minHeight: '100vh',
+                    width: '100vw',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }
+            }, [
+                // Header
+                React.createElement('div', {
+                    key: 'header',
+                    className: "p-4 bg-gray-900 flex justify-between items-center"
+                }, [
+                    React.createElement('div', {
+                        key: 'scores',
+                        className: "flex gap-4"
+                    }, [
+                        React.createElement('div', {
+                            key: 'correct',
+                            className: "text-sm"
+                        }, React.createElement('span', {
+                            className: "text-green-400"
+                        }, `Correct: ${score}`)),
+                        React.createElement('div', {
+                            key: 'missed',
+                            className: "text-sm"
+                        }, React.createElement('span', {
+                            className: "text-red-400"
+                        }, `Missed: ${missed}`)),
+                        React.createElement('div', {
+                            key: 'wrong',
+                            className: "text-sm"
+                        }, React.createElement('span', {
+                            className: "text-orange-400"
+                        }, `Wrong: ${wrongTaps}`))
+                    ]),
+                    
+                    React.createElement('div', {
+                        key: 'controls',
+                        className: "flex gap-2"
+                    }, [
+                        React.createElement('button', {
+                            key: 'settings',
+                            onClick: () => setShowSettings(!showSettings),
+                            className: "p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+                        }, React.createElement(SettingsIcon)),
+                        React.createElement('button', {
+                            key: 'reset',
+                            onClick: resetGame,
+                            className: "p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+                        }, React.createElement(RotateCcwIcon)),
+                        React.createElement('button', {
+                            key: 'playpause',
+                            onClick: isPlaying ? stopGame : startGame,
+                            className: `p-2 rounded-lg transition-colors ${
+                                isPlaying 
+                                    ? 'bg-red-600 hover:bg-red-500' 
+                                    : 'bg-green-600 hover:bg-green-500'
+                            }`,
+                            disabled: availableColors.length === 0
+                        }, isPlaying ? React.createElement(PauseIcon) : React.createElement(PlayIcon))
+                    ])
+                ]),
+
+                // Settings Panel
+                showSettings && React.createElement('div', {
+                    key: 'settings',
+                    className: "p-4 bg-gray-800 border-b border-gray-700 max-h-96 overflow-y-auto"
+                }, React.createElement('div', {
+                    className: "space-y-6"
+                }, [
+                    // Timing Settings
+                    React.createElement('div', {
+                        key: 'timing'
+                    }, [
+                        React.createElement('h3', {
+                            key: 'timing-title',
+                            className: "text-lg font-semibold mb-3"
+                        }, "Timing Settings"),
+                        React.createElement('div', {
+                            key: 'timing-grid',
+                            className: "grid grid-cols-1 md:grid-cols-2 gap-4"
+                        }, [
+                            React.createElement('div', {
+                                key: 'interval-base'
+                            }, [
+                                React.createElement('label', {
+                                    key: 'interval-label',
+                                    className: "block text-sm font-medium mb-2"
+                                }, `Base Interval: ${(intervalTimeBase / 1000).toFixed(1)}s`),
+                                React.createElement('input', {
+                                    key: 'interval-input',
+                                    type: "range",
+                                    min: "1000",
+                                    max: "10000",
+                                    step: "500",
+                                    value: intervalTimeBase,
+                                    onChange: (e) => setIntervalTimeBase(Number(e.target.value)),
+                                    className: "w-full"
+                                })
+                            ]),
+                            
+                            React.createElement('div', {
+                                key: 'interval-var'
+                            }, [
+                                React.createElement('label', {
+                                    key: 'interval-var-label',
+                                    className: "block text-sm font-medium mb-2"
+                                }, `Interval Variation: ±${(intervalVariation / 1000).toFixed(1)}s`),
+                                React.createElement('input', {
+                                    key: 'interval-var-input',
+                                    type: "range",
+                                    min: "0",
+                                    max: "5000",
+                                    step: "250",
+                                    value: intervalVariation,
+                                    onChange: (e) => setIntervalVariation(Number(e.target.value)),
+                                    className: "w-full"
+                                })
+                            ]),
+                            
+                            React.createElement('div', {
+                                key: 'display-base'
+                            }, [
+                                React.createElement('label', {
+                                    key: 'display-label',
+                                    className: "block text-sm font-medium mb-2"
+                                }, `Base Display Time: ${(displayTimeBase / 1000).toFixed(1)}s`),
+                                React.createElement('input', {
+                                    key: 'display-input',
+                                    type: "range",
+                                    min: "500",
+                                    max: "5000",
+                                    step: "250",
+                                    value: displayTimeBase,
+                                    onChange: (e) => setDisplayTimeBase(Number(e.target.value)),
+                                    className: "w-full"
+                                })
+                            ]),
+                            
+                            React.createElement('div', {
+                                key: 'display-var'
+                            }, [
+                                React.createElement('label', {
+                                    key: 'display-var-label',
+                                    className: "block text-sm font-medium mb-2"
+                                }, `Display Variation: ±${(displayVariation / 1000).toFixed(1)}s`),
+                                React.createElement('input', {
+                                    key: 'display-var-input',
+                                    type: "range",
+                                    min: "0",
+                                    max: "2000",
+                                    step: "100",
+                                    value: displayVariation,
+                                    onChange: (e) => setDisplayVariation(Number(e.target.value)),
+                                    className: "w-full"
+                                })
+                            ])
+                        ])
+                    ]),
+
+                    // Color Settings
+                    React.createElement('div', {
+                        key: 'colors'
+                    }, [
+                        React.createElement('h3', {
+                            key: 'colors-title',
+                            className: "text-lg font-semibold mb-3"
+                        }, "Color Settings"),
+                        React.createElement('div', {
+                            key: 'colors-grid',
+                            className: "grid grid-cols-1 md:grid-cols-2 gap-6"
+                        }, [
+                            React.createElement('div', {
+                                key: 'available'
+                            }, [
+                                React.createElement('h4', {
+                                    key: 'available-title',
+                                    className: "font-medium mb-2"
+                                }, `Available Colors (${availableColors.length})`),
+                                React.createElement('div', {
+                                    key: 'available-grid',
+                                    className: "grid grid-cols-3 gap-2"
+                                }, allColors.map(({ color, name }) => 
+                                    React.createElement('button', {
+                                        key: color,
+                                        onClick: () => toggleColorAvailable(color),
+                                        className: `p-2 rounded-lg border-2 text-xs transition-all ${
+                                            availableColors.includes(color)
+                                                ? 'border-white opacity-100'
+                                                : 'border-gray-600 opacity-50'
+                                        }`,
+                                        style: { backgroundColor: color }
+                                    }, name)
+                                ))
+                            ]),
+                            
+                            React.createElement('div', {
+                                key: 'correct'
+                            }, [
+                                React.createElement('h4', {
+                                    key: 'correct-title',
+                                    className: "font-medium mb-2 flex items-center gap-2"
+                                }, [
+                                    React.createElement(CheckIcon, { key: 'check', size: 16, className: "text-green-400" }),
+                                    `Correct Colors (${correctColors.length})`
+                                ]),
+                                React.createElement('div', {
+                                    key: 'correct-grid',
+                                    className: "grid grid-cols-3 gap-2"
+                                }, allColors.filter(({ color }) => availableColors.includes(color)).map(({ color, name }) => 
+                                    React.createElement('button', {
+                                        key: color,
+                                        onClick: () => toggleColorCorrect(color),
+                                        className: `p-2 rounded-lg border-2 text-xs transition-all relative ${
+                                            correctColors.includes(color)
+                                                ? 'border-green-400'
+                                                : 'border-gray-600 opacity-70'
+                                        }`,
+                                        style: { backgroundColor: color }
+                                    }, [
+                                        name,
+                                        correctColors.includes(color) && React.createElement(CheckIcon, {
+                                            key: 'check-mark',
+                                            size: 12,
+                                            className: "absolute top-0 right-0 text-green-400 bg-black rounded-full"
+                                        })
+                                    ])
+                                ))
+                            ])
+                        ])
+                    ])
+                ])),
+
+                // Game Area
+                React.createElement('div', {
+                    key: 'game-area',
+                    className: "flex-1 flex items-center justify-center cursor-pointer relative",
+                    onClick: handleColorTap
+                }, [
+                    showColor && isPlaying && React.createElement('div', {
+                        key: 'color-circle',
+                        className: "w-64 h-64 rounded-full shadow-2xl transform transition-all duration-300 scale-100 hover:scale-105",
+                        style: { backgroundColor: currentColor }
+                    }),
+                    
+                    !isPlaying && React.createElement('div', {
+                        key: 'welcome',
+                        className: "text-center"
+                    }, [
+                        React.createElement('h2', {
+                            key: 'title',
+                            className: "text-3xl font-bold mb-4"
+                        }, "Advanced Color Flash Game"),
+                        React.createElement('p', {
+                            key: 'description',
+                            className: "text-gray-400 max-w-md mb-4"
+                        }, "Tap only the \"correct\" colors. Avoid \"wrong\" colors. Configure timing variation and color rules in settings."),
+                        availableColors.length === 0 && React.createElement('p', {
+                            key: 'warning',
+                            className: "text-red-400 text-sm"
+                        }, "Please select at least one available color in settings to start!")
+                    ])
+                ]),
+
+                // Instructions
+                isPlaying && React.createElement('div', {
+                    key: 'instructions',
+                    className: "p-4 bg-gray-900 text-center text-sm text-gray-400"
+                }, "Tap only the correct colors - avoid wrong colors!")
+            ]);
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(ColorFlashGame));
+    </script>
+</body>
+</html>
