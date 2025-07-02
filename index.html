@@ -137,32 +137,32 @@
             const nextColorTimeoutRef = useRef(null);
             
             const allColors = [
-                { color: '#ff0000', name: 'Red', nl: 'Rood' },
-                { color: '#00ff00', name: 'Green', nl: 'Groen' },
-                { color: '#0000ff', name: 'Blue', nl: 'Blauw' },
-                { color: '#ffff00', name: 'Yellow', nl: 'Geel' },
-                { color: '#ff00ff', name: 'Magenta', nl: 'Magenta' },
-                { color: '#00ffff', name: 'Cyan', nl: 'Cyaan' },
-                { color: '#ff8000', name: 'Orange', nl: 'Oranje' },
-                { color: '#8000ff', name: 'Purple', nl: 'Paars' },
-                { color: '#ff0080', name: 'Pink', nl: 'Roze' },
-                { color: '#80ff00', name: 'Lime', nl: 'Limoen' },
-                { color: '#0080ff', name: 'Sky Blue', nl: 'Hemelsblauw' },
-                { color: '#ff8080', name: 'Light Red', nl: 'Lichtrood' }
+                { color: '#ff0000', name: 'Red', nl: 'Rood', textColor: 'white' },
+                { color: '#00ff00', name: 'Green', nl: 'Groen', textColor: 'black' },
+                { color: '#0000ff', name: 'Blue', nl: 'Blauw', textColor: 'white' },
+                { color: '#ffff00', name: 'Yellow', nl: 'Geel', textColor: 'black' },
+                { color: '#ff00ff', name: 'Magenta', nl: 'Magenta', textColor: 'white' },
+                { color: '#00ffff', name: 'Cyan', nl: 'Cyaan', textColor: 'black' },
+                { color: '#ff8000', name: 'Orange', nl: 'Oranje', textColor: 'black' },
+                { color: '#8000ff', name: 'Purple', nl: 'Paars', textColor: 'white' },
+                { color: '#ff0080', name: 'Pink', nl: 'Roze', textColor: 'white' },
+                { color: '#80ff00', name: 'Lime', nl: 'Limoen', textColor: 'black' },
+                { color: '#0080ff', name: 'Sky Blue', nl: 'Hemelsblauw', textColor: 'white' },
+                { color: '#ff8080', name: 'Light Red', nl: 'Lichtrood', textColor: 'black' }
             ];
 
             // Language translations
             const translations = {
                 en: {
-                    title: "Color Flash Game",
+                    title: "Advanced Color Flash Game",
                     description: "Tap only the \"correct\" colors. Avoid \"wrong\" colors. Configure timing variation and color rules in settings.",
                     instructions: "Tap only the correct colors - avoid wrong colors!",
                     correct: "Correct",
                     missed: "Missed", 
                     wrong: "Wrong",
                     colorWarning: "Please select at least one available color in settings to start!",
-                    timingSettings: "Settings",
-                    colorSettings: "Colors",
+                    timingSettings: "Timing Settings",
+                    colorSettings: "Color Settings",
                     language: "Language",
                     baseInterval: "Base Interval",
                     intervalVariation: "Interval Variation",
@@ -184,7 +184,7 @@
                     wrong: "Fout", 
                     colorWarning: "Selecteer ten minste één beschikbare kleur in instellingen om te starten!",
                     timingSettings: "Instellingen",
-                    colorSettings: "Kleuren",
+                    colorSettings: "Kleur Instellingen",
                     language: "Taal",
                     baseInterval: "Basis Interval",
                     intervalVariation: "Interval Variatie",
@@ -395,7 +395,7 @@
                     className: "p-4 bg-gray-800 border-b border-gray-700 max-h-screen overflow-y-auto",
                     style: { maxHeight: '70vh' }
                 }, React.createElement('div', {
-                    className: "space-y-6"
+                    className: "max-w-4xl mx-auto space-y-6"
                 }, [
                     // Language Settings
                     React.createElement('div', {
@@ -558,7 +558,7 @@
                                 React.createElement('div', {
                                     key: 'available-grid',
                                     className: "grid grid-cols-3 gap-2"
-                                }, allColors.map(({ color, name, nl }) => 
+                                }, allColors.map(({ color, name, nl, textColor }) => 
                                     React.createElement('button', {
                                         key: color,
                                         onClick: () => toggleColorAvailable(color),
@@ -567,7 +567,10 @@
                                                 ? 'border-white opacity-100'
                                                 : 'border-gray-600 opacity-50'
                                         }`,
-                                        style: { backgroundColor: color }
+                                        style: { 
+                                            backgroundColor: color,
+                                            color: textColor
+                                        }
                                     }, language === 'nl' ? nl : name)
                                 ))
                             ]),
@@ -585,7 +588,7 @@
                                 React.createElement('div', {
                                     key: 'correct-grid',
                                     className: "grid grid-cols-3 gap-2"
-                                }, allColors.filter(({ color }) => availableColors.includes(color)).map(({ color, name, nl }) => 
+                                }, allColors.filter(({ color }) => availableColors.includes(color)).map(({ color, name, nl, textColor }) => 
                                     React.createElement('button', {
                                         key: color,
                                         onClick: () => toggleColorCorrect(color),
@@ -594,13 +597,18 @@
                                                 ? 'border-green-400'
                                                 : 'border-gray-600 opacity-70'
                                         }`,
-                                        style: { backgroundColor: color }
+                                        style: { 
+                                            backgroundColor: color,
+                                            color: textColor
+                                        }
                                     }, [
                                         language === 'nl' ? nl : name,
                                         correctColors.includes(color) && React.createElement(CheckIcon, {
                                             key: 'check-mark',
                                             size: 12,
-                                            className: "absolute top-0 right-0 text-green-400 bg-black rounded-full"
+                                            className: `absolute top-0 right-0 rounded-full ${
+                                                textColor === 'black' ? 'text-green-600 bg-white' : 'text-green-400 bg-black'
+                                            }`
                                         })
                                     ])
                                 ))
