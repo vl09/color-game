@@ -593,7 +593,11 @@
                         key: 'mute',
                         onClick: () => {
                             setIsMuted(!isMuted);
-                            // Resume audio context when toggling mute
+                            // Force recreate audio context
+                            if (audioContextRef.current) {
+                                audioContextRef.current.close();
+                                audioContextRef.current = null;
+                            }
                             const audioContext = createAudioContext();
                             if (audioContext.state === 'suspended') {
                                 audioContext.resume();
