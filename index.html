@@ -141,6 +141,35 @@
             React.createElement('path', { key: 2, d: "M6 6l12 12" })
         ]);
         
+        const VolumeXIcon = () => React.createElement('svg', {
+            width: "20",
+            height: "20",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+        }, [
+            React.createElement('polygon', { key: 1, points: "11,5 6,9 2,9 2,15 6,15 11,19" }),
+            React.createElement('line', { key: 2, x1: "23", y1: "9", x2: "17", y2: "15" }),
+            React.createElement('line', { key: 3, x1: "17", y1: "9", x2: "23", y2: "15" })
+        ]);
+
+        const Volume2Icon = () => React.createElement('svg', {
+            width: "20",
+            height: "20",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+        }, [
+            React.createElement('polygon', { key: 1, points: "11,5 6,9 2,9 2,15 6,15 11,19" }),
+            React.createElement('path', { key: 2, d: "M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" })
+        ]);
+        
         // Cookie utility functions
         const setCookie = (name, value, days = 365) => {
             const expires = new Date();
@@ -174,6 +203,7 @@
             const [missed, setMissed] = useState(0);
             const [wrongTaps, setWrongTaps] = useState(0);
             const [showSettings, setShowSettings] = useState(false);
+            const [isMuted, setIsMuted] = useState(() => getCookie('colorGameMuted') || false);
             
             // Load settings from cookies or use defaults
             const [language, setLanguage] = useState(() => getCookie('colorGameLanguage') || 'nl');
@@ -191,6 +221,78 @@
             const gameIntervalRef = useRef(null);
             const colorTimeoutRef = useRef(null);
             const nextColorTimeoutRef = useRef(null);
+            
+            // Audio context and sound generation
+            const audioContextRef = useRef(null);
+
+            const createAudioContext = () => {
+                if (!audioContextRef.current) {
+                    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                return audioContextRef.current;
+            };
+
+            const playBeep = (frequency, duration, type = 'correct') => {
+                if (isMuted) return; // Don't play sound if muted
+                try {
+                    const audioContext = createAudioContext();
+
+                    if (type === 'correct') {
+                        // Short sharp beep for correct
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                        oscillator.type = 'square';
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.1);
+
+                    } else if (type === 'wrong') {
+                        // Two short sharp beeps for wrong
+                        for (let i = 0; i < 2; i++) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+
+                            const startTime = audioContext.currentTime + (i * 0.15);
+                            oscillator.frequency.setValueAtTime(400, startTime);
+                            oscillator.type = 'square';
+                            gainNode.gain.setValueAtTime(0.2, startTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.1);
+
+                            oscillator.start(startTime);
+                            oscillator.stop(startTime + 0.1);
+                        }
+
+                    } else if (type === 'miss') {
+                        // Longer beep for missed
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+                        oscillator.type = 'square';
+                        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.5);
+                    }
+
+                } catch (error) {
+                    console.log('Audio not supported or blocked');
+                }
+            };
             
             const allColors = [
                 { color: '#ff0000', name: 'Red', nl: 'Rood', textColor: 'white' },
@@ -310,6 +412,7 @@
                     setShowColor(false);
                     if (isCorrect) {
                         setMissed(prev => prev + 1);
+                        playBeep(500, 0.5, 'miss'); // Play miss sound for correct colors that timeout
                     }
                     
                     nextColorTimeoutRef.current = setTimeout(() => {
@@ -331,6 +434,8 @@
                 setScore(0);
                 setMissed(0);
                 setWrongTaps(0);
+                // Initialize audio context on user interaction
+                createAudioContext();
                 
                 setTimeout(() => {
                     showNewColor();
@@ -369,10 +474,12 @@
                     
                     if (isCorrectColor) {
                         setScore(prev => prev + 1);
+                        playBeep(800, 0.1, 'correct'); // Happy beep for correct taps
                     } else {
                         setWrongTaps(prev => prev + 1);
+                        playBeep(400, 0.1, 'wrong'); // Sad beep for wrong taps
                     }
-                    
+
                     if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
                     
                     nextColorTimeoutRef.current = setTimeout(() => {
@@ -419,6 +526,10 @@
             }, [displayVariation]);
             
             useEffect(() => {
+                setCookie('colorGameMuted', isMuted);
+            }, [isMuted]);
+            
+            useEffect(() => {
                 return () => {
                     if (gameIntervalRef.current) clearTimeout(gameIntervalRef.current);
                     if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
@@ -463,6 +574,15 @@
                         onClick: toggleSettings,
                         className: "p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
                     }, React.createElement(SettingsIcon)),
+                    React.createElement('button', {
+                        key: 'mute',
+                        onClick: () => setIsMuted(!isMuted),
+                        className: `p-2 rounded-lg transition-colors ${
+                            isMuted 
+                                ? 'bg-red-600 hover:bg-red-500' 
+                                : 'bg-gray-700 hover:bg-gray-600'
+                        }`
+                    }, isMuted ? React.createElement(VolumeXIcon) : React.createElement(Volume2Icon)),
                     React.createElement('button', {
                         key: 'reset',
                         onClick: resetGame,
