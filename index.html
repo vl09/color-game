@@ -229,9 +229,15 @@
                 if (!audioContextRef.current) {
                     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
                 }
+
+                // Resume audio context if it's suspended
+                if (audioContextRef.current.state === 'suspended') {
+                    audioContextRef.current.resume();
+                }
+
                 return audioContextRef.current;
             };
-
+            
             const playBeep = (frequency, duration, type = 'correct') => {
                 if (isMuted) return; // Don't play sound if muted
                 try {
@@ -439,8 +445,12 @@
                 setScore(0);
                 setMissed(0);
                 setWrongTaps(0);
-                // Initialize audio context on user interaction
-                createAudioContext();
+
+                // Initialize and resume audio context on user interaction
+                const audioContext = createAudioContext();
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
                 
                 setTimeout(() => {
                     showNewColor();
@@ -581,7 +591,14 @@
                     }, React.createElement(SettingsIcon)),
                     React.createElement('button', {
                         key: 'mute',
-                        onClick: () => setIsMuted(!isMuted),
+                        onClick: () => {
+                            setIsMuted(!isMuted);
+                            // Resume audio context when toggling mute
+                            const audioContext = createAudioContext();
+                            if (audioContext.state === 'suspended') {
+                                audioContext.resume();
+                            }
+                        },
                         className: `p-2 rounded-lg transition-colors ${
                             isMuted 
                                 ? 'bg-red-600 hover:bg-red-500' 
