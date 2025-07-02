@@ -207,9 +207,9 @@
             
             // Load settings from cookies or use defaults
             const [language, setLanguage] = useState(() => getCookie('colorGameLanguage') || 'nl');
-            const [intervalTimeBase, setIntervalTimeBase] = useState(() => getCookie('colorGameIntervalBase') || 1500);
+            const [intervalTimeBase, setIntervalTimeBase] = useState(() => getCookie('colorGameIntervalBase') || 2200);
             const [intervalVariation, setIntervalVariation] = useState(() => getCookie('colorGameIntervalVar') || 500);
-            const [displayTimeBase, setDisplayTimeBase] = useState(() => getCookie('colorGameDisplayBase') || 1800);
+            const [displayTimeBase, setDisplayTimeBase] = useState(() => getCookie('colorGameDisplayBase') || 2200);
             const [displayVariation, setDisplayVariation] = useState(() => getCookie('colorGameDisplayVar') || 300);
             const [availableColors, setAvailableColors] = useState(() => 
                 getCookie('colorGameAvailable') || ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
