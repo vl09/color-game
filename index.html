@@ -140,6 +140,30 @@
             React.createElement('path', { key: 1, d: "M18 6L6 18" }),
             React.createElement('path', { key: 2, d: "M6 6l12 12" })
         ]);
+        
+        // Cookie utility functions
+        const setCookie = (name, value, days = 365) => {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${encodeURIComponent(JSON.stringify(value))};expires=${expires.toUTCString()};path=/`;
+        };
+
+        const getCookie = (name) => {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) {
+                    try {
+                        return JSON.parse(decodeURIComponent(c.substring(nameEQ.length, c.length)));
+                    } catch (e) {
+                        return null;
+                    }
+                }
+            }
+            return null;
+        };
 
         const ColorFlashGame = () => {
             const [isPlaying, setIsPlaying] = useState(false);
@@ -150,20 +174,20 @@
             const [missed, setMissed] = useState(0);
             const [wrongTaps, setWrongTaps] = useState(0);
             const [showSettings, setShowSettings] = useState(false);
-            const [language, setLanguage] = useState('nl'); // Dutch default
             
-            // Settings with new defaults
-            const [intervalTimeBase, setIntervalTimeBase] = useState(1500); // 1.5s
-            const [intervalVariation, setIntervalVariation] = useState(500);  // 0.5s
-            const [displayTimeBase, setDisplayTimeBase] = useState(1200);    // 1.2s
-            const [displayVariation, setDisplayVariation] = useState(300);   // 0.3s
-            
-            // Color selection
-            const [availableColors, setAvailableColors] = useState([
-                '#ff0000', '#00ff00', '#0000ff', '#ffff00'
-            ]);
-            const [correctColors, setCorrectColors] = useState(['#00ff00', '#0000ff']);
-            
+            // Load settings from cookies or use defaults
+            const [language, setLanguage] = useState(() => getCookie('colorGameLanguage') || 'nl');
+            const [intervalTimeBase, setIntervalTimeBase] = useState(() => getCookie('colorGameIntervalBase') || 1500);
+            const [intervalVariation, setIntervalVariation] = useState(() => getCookie('colorGameIntervalVar') || 500);
+            const [displayTimeBase, setDisplayTimeBase] = useState(() => getCookie('colorGameDisplayBase') || 1200);
+            const [displayVariation, setDisplayVariation] = useState(() => getCookie('colorGameDisplayVar') || 300);
+            const [availableColors, setAvailableColors] = useState(() => 
+                getCookie('colorGameAvailable') || ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
+            );
+            const [correctColors, setCorrectColors] = useState(() => 
+                getCookie('colorGameCorrect') || ['#00ff00', '#0000ff']
+            );
+
             const gameIntervalRef = useRef(null);
             const colorTimeoutRef = useRef(null);
             const nextColorTimeoutRef = useRef(null);
@@ -358,20 +382,41 @@
             };
             
             const toggleColorAvailable = (color) => {
-                setAvailableColors(prev => 
-                    prev.includes(color) 
-                        ? prev.filter(c => c !== color)
-                        : [...prev, color]
-                );
+                const newColors = availableColors.includes(color) 
+                    ? availableColors.filter(c => c !== color)
+                    : [...availableColors, color];
+                setAvailableColors(newColors);
+                setCookie('colorGameAvailable', newColors);
+            };
+
+            const toggleColorCorrect = (color) => {
+                const newCorrectColors = correctColors.includes(color) 
+                    ? correctColors.filter(c => c !== color)
+                    : [...correctColors, color];
+                setCorrectColors(newCorrectColors);
+                setCookie('colorGameCorrect', newCorrectColors);
             };
             
-            const toggleColorCorrect = (color) => {
-                setCorrectColors(prev => 
-                    prev.includes(color) 
-                        ? prev.filter(c => c !== color)
-                        : [...prev, color]
-                );
-            };
+            // Save settings to cookies when they change
+            useEffect(() => {
+                setCookie('colorGameLanguage', language);
+            }, [language]);
+
+            useEffect(() => {
+                setCookie('colorGameIntervalBase', intervalTimeBase);
+            }, [intervalTimeBase]);
+
+            useEffect(() => {
+                setCookie('colorGameIntervalVar', intervalVariation);
+            }, [intervalVariation]);
+
+            useEffect(() => {
+                setCookie('colorGameDisplayBase', displayTimeBase);
+            }, [displayTimeBase]);
+
+            useEffect(() => {
+                setCookie('colorGameDisplayVar', displayVariation);
+            }, [displayVariation]);
             
             useEffect(() => {
                 return () => {
