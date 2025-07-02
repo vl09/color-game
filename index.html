@@ -257,6 +257,7 @@
             
             const startGame = () => {
                 setIsPlaying(true);
+                setShowSettings(false); // Auto-close settings when starting
                 setScore(0);
                 setMissed(0);
                 setWrongTaps(0);
@@ -273,6 +274,16 @@
                 if (gameIntervalRef.current) clearTimeout(gameIntervalRef.current);
                 if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
                 if (nextColorTimeoutRef.current) clearTimeout(nextColorTimeoutRef.current);
+            };
+            
+            const toggleSettings = () => {
+                const newShowSettings = !showSettings;
+                setShowSettings(newShowSettings);
+                
+                // If opening settings while game is playing, pause the game
+                if (newShowSettings && isPlaying) {
+                    stopGame();
+                }
             };
             
             const resetGame = () => {
@@ -368,7 +379,7 @@
                     }, [
                         React.createElement('button', {
                             key: 'settings',
-                            onClick: () => setShowSettings(!showSettings),
+                            onClick: toggleSettings,
                             className: "p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
                         }, React.createElement(SettingsIcon)),
                         React.createElement('button', {
