@@ -246,6 +246,27 @@ const pauseGame = () => {
                 return availableColors[Math.floor(Math.random() * availableColors.length)];
             };
             
+            const pauseGame = () => {
+                setShowColor(false);
+                
+                if (gameIntervalRef.current) clearTimeout(gameIntervalRef.current);
+                if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
+                if (nextColorTimeoutRef.current) clearTimeout(nextColorTimeoutRef.current);
+            };
+
+            const toggleSettings = () => {
+                if (!showSettings) {
+                    // Opening settings
+                    if (isPlaying) {
+                        pauseGame();
+                    }
+                    setShowSettings(true);
+                } else {
+                    // Closing settings
+                    setShowSettings(false);
+                }
+            };
+            
             const showNewColor = () => {
                 const newColor = getRandomColor();
                 const isCorrect = correctColors.includes(newColor);
