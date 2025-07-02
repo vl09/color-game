@@ -230,10 +230,20 @@
                 };
                 document.addEventListener('touchend', preventDefault, false);
                 
+                // Add spacebar functionality
+                const handleKeyPress = (e) => {
+                    if (e.code === 'Space' || e.key === ' ') {
+                        e.preventDefault(); // Prevent page scroll
+                        handleColorTap();
+                    }
+                };
+                document.addEventListener('keydown', handleKeyPress);
+                
                 return () => {
                     document.removeEventListener('touchend', preventDefault, false);
+                    document.removeEventListener('keydown', handleKeyPress);
                 };
-            }, []);
+            }, [showColor, isPlaying, isCorrectColor]);
             
             const getRandomVariation = (base, variation) => {
                 const min = base - variation / 2;
@@ -371,13 +381,13 @@
                         key: 'missed',
                         className: "text-sm"
                     }, React.createElement('span', {
-                        className: "text-orange-400"
+                        className: "text-red-400"
                     }, `${t.missed}: ${missed}`)),
                     React.createElement('div', {
                         key: 'wrong',
                         className: "text-sm"
                     }, React.createElement('span', {
-                        className: "text-red-400"
+                        className: "text-orange-400"
                     }, `${t.wrong}: ${wrongTaps}`))
                 ]),
                 
