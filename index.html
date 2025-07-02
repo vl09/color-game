@@ -118,12 +118,13 @@
             const [missed, setMissed] = useState(0);
             const [wrongTaps, setWrongTaps] = useState(0);
             const [showSettings, setShowSettings] = useState(false);
+            const [language, setLanguage] = useState('nl'); // Dutch default
             
-            // Settings
-            const [intervalTimeBase, setIntervalTimeBase] = useState(3000);
-            const [intervalVariation, setIntervalVariation] = useState(1000);
-            const [displayTimeBase, setDisplayTimeBase] = useState(2000);
-            const [displayVariation, setDisplayVariation] = useState(500);
+            // Settings with new defaults
+            const [intervalTimeBase, setIntervalTimeBase] = useState(1500); // 1.5s
+            const [intervalVariation, setIntervalVariation] = useState(500);  // 0.5s
+            const [displayTimeBase, setDisplayTimeBase] = useState(1300);    // 1.3s
+            const [displayVariation, setDisplayVariation] = useState(300);   // 0.3s
             
             // Color selection
             const [availableColors, setAvailableColors] = useState([
@@ -136,19 +137,61 @@
             const nextColorTimeoutRef = useRef(null);
             
             const allColors = [
-                { color: '#ff0000', name: 'Red' },
-                { color: '#00ff00', name: 'Green' },
-                { color: '#0000ff', name: 'Blue' },
-                { color: '#ffff00', name: 'Yellow' },
-                { color: '#ff00ff', name: 'Magenta' },
-                { color: '#00ffff', name: 'Cyan' },
-                { color: '#ff8000', name: 'Orange' },
-                { color: '#8000ff', name: 'Purple' },
-                { color: '#ff0080', name: 'Pink' },
-                { color: '#80ff00', name: 'Lime' },
-                { color: '#0080ff', name: 'Sky Blue' },
-                { color: '#ff8080', name: 'Light Red' }
+                { color: '#ff0000', name: 'Red', nl: 'Rood' },
+                { color: '#00ff00', name: 'Green', nl: 'Groen' },
+                { color: '#0000ff', name: 'Blue', nl: 'Blauw' },
+                { color: '#ffff00', name: 'Yellow', nl: 'Geel' },
+                { color: '#ff00ff', name: 'Magenta', nl: 'Magenta' },
+                { color: '#00ffff', name: 'Cyan', nl: 'Cyaan' },
+                { color: '#ff8000', name: 'Orange', nl: 'Oranje' },
+                { color: '#8000ff', name: 'Purple', nl: 'Paars' },
+                { color: '#ff0080', name: 'Pink', nl: 'Roze' },
+                { color: '#80ff00', name: 'Lime', nl: 'Limoen' },
+                { color: '#0080ff', name: 'Sky Blue', nl: 'Hemelsblauw' },
+                { color: '#ff8080', name: 'Light Red', nl: 'Lichtrood' }
             ];
+
+            // Language translations
+            const translations = {
+                en: {
+                    title: "Advanced Color Flash Game",
+                    description: "Tap only the \"correct\" colors. Avoid \"wrong\" colors. Configure timing variation and color rules in settings.",
+                    instructions: "Tap only the correct colors - avoid wrong colors!",
+                    correct: "Correct",
+                    missed: "Missed", 
+                    wrong: "Wrong",
+                    colorWarning: "Please select at least one available color in settings to start!",
+                    timingSettings: "Timing Settings",
+                    colorSettings: "Color Settings",
+                    language: "Language",
+                    baseInterval: "Base Interval",
+                    intervalVariation: "Interval Variation",
+                    baseDisplayTime: "Base Display Time", 
+                    displayVariation: "Display Variation",
+                    availableColors: "Available Colors",
+                    correctColors: "Correct Colors"
+                },
+                nl: {
+                    title: "Geavanceerd Kleurflits Spel",
+                    description: "Tik alleen op de \"juiste\" kleuren. Vermijd \"foute\" kleuren. Configureer timing variatie en kleurregels in instellingen.",
+                    instructions: "Tik alleen op de juiste kleuren - vermijd foute kleuren!",
+                    correct: "Juist",
+                    missed: "Gemist",
+                    wrong: "Fout", 
+                    colorWarning: "Selecteer ten minste één beschikbare kleur in instellingen om te starten!",
+                    timingSettings: "Timing Instellingen",
+                    colorSettings: "Kleur Instellingen",
+                    language: "Taal",
+                    baseInterval: "Basis Interval",
+                    intervalVariation: "Interval Variatie",
+                    baseDisplayTime: "Basis Weergavetijd",
+                    displayVariation: "Weergave Variatie", 
+                    availableColors: "Beschikbare Kleuren",
+                    correctColors: "Juiste Kleuren"
+                }
+            };
+
+            const t = translations[language];
             
             useEffect(() => {
                 let lastTouchEnd = 0;
@@ -296,19 +339,19 @@
                             className: "text-sm"
                         }, React.createElement('span', {
                             className: "text-green-400"
-                        }, `Correct: ${score}`)),
+                        }, `${t.correct}: ${score}`)),
                         React.createElement('div', {
                             key: 'missed',
                             className: "text-sm"
                         }, React.createElement('span', {
                             className: "text-red-400"
-                        }, `Missed: ${missed}`)),
+                        }, `${t.missed}: ${missed}`)),
                         React.createElement('div', {
                             key: 'wrong',
                             className: "text-sm"
                         }, React.createElement('span', {
                             className: "text-orange-400"
-                        }, `Wrong: ${wrongTaps}`))
+                        }, `${t.wrong}: ${wrongTaps}`))
                     ]),
                     
                     React.createElement('div', {
@@ -341,10 +384,44 @@
                 // Settings Panel
                 showSettings && React.createElement('div', {
                     key: 'settings',
-                    className: "p-4 bg-gray-800 border-b border-gray-700 max-h-96 overflow-y-auto"
+                    className: "p-4 bg-gray-800 border-b border-gray-700 max-h-screen overflow-y-auto",
+                    style: { maxHeight: '70vh' }
                 }, React.createElement('div', {
                     className: "space-y-6"
                 }, [
+                    // Language Settings
+                    React.createElement('div', {
+                        key: 'language'
+                    }, [
+                        React.createElement('h3', {
+                            key: 'language-title',
+                            className: "text-lg font-semibold mb-3"
+                        }, t.language),
+                        React.createElement('div', {
+                            key: 'language-buttons',
+                            className: "flex gap-2"
+                        }, [
+                            React.createElement('button', {
+                                key: 'en',
+                                onClick: () => setLanguage('en'),
+                                className: `px-4 py-2 rounded-lg transition-colors ${
+                                    language === 'en' 
+                                        ? 'bg-blue-600 text-white' 
+                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                }`
+                            }, 'English'),
+                            React.createElement('button', {
+                                key: 'nl',
+                                onClick: () => setLanguage('nl'),
+                                className: `px-4 py-2 rounded-lg transition-colors ${
+                                    language === 'nl' 
+                                        ? 'bg-blue-600 text-white' 
+                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                }`
+                            }, 'Nederlands')
+                        ])
+                    ]),
+
                     // Timing Settings
                     React.createElement('div', {
                         key: 'timing'
@@ -352,7 +429,7 @@
                         React.createElement('h3', {
                             key: 'timing-title',
                             className: "text-lg font-semibold mb-3"
-                        }, "Timing Settings"),
+                        }, t.timingSettings),
                         React.createElement('div', {
                             key: 'timing-grid',
                             className: "grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -363,13 +440,13 @@
                                 React.createElement('label', {
                                     key: 'interval-label',
                                     className: "block text-sm font-medium mb-2"
-                                }, `Base Interval: ${(intervalTimeBase / 1000).toFixed(1)}s`),
+                                }, `${t.baseInterval}: ${(intervalTimeBase / 1000).toFixed(1)}s`),
                                 React.createElement('input', {
                                     key: 'interval-input',
                                     type: "range",
-                                    min: "1000",
+                                    min: "500",
                                     max: "10000",
-                                    step: "500",
+                                    step: "100",
                                     value: intervalTimeBase,
                                     onChange: (e) => setIntervalTimeBase(Number(e.target.value)),
                                     className: "w-full"
@@ -382,13 +459,13 @@
                                 React.createElement('label', {
                                     key: 'interval-var-label',
                                     className: "block text-sm font-medium mb-2"
-                                }, `Interval Variation: ±${(intervalVariation / 1000).toFixed(1)}s`),
+                                }, `${t.intervalVariation}: ±${(intervalVariation / 1000).toFixed(1)}s`),
                                 React.createElement('input', {
                                     key: 'interval-var-input',
                                     type: "range",
                                     min: "0",
-                                    max: "5000",
-                                    step: "250",
+                                    max: "3000",
+                                    step: "100",
                                     value: intervalVariation,
                                     onChange: (e) => setIntervalVariation(Number(e.target.value)),
                                     className: "w-full"
@@ -401,13 +478,13 @@
                                 React.createElement('label', {
                                     key: 'display-label',
                                     className: "block text-sm font-medium mb-2"
-                                }, `Base Display Time: ${(displayTimeBase / 1000).toFixed(1)}s`),
+                                }, `${t.baseDisplayTime}: ${(displayTimeBase / 1000).toFixed(1)}s`),
                                 React.createElement('input', {
                                     key: 'display-input',
                                     type: "range",
-                                    min: "500",
+                                    min: "300",
                                     max: "5000",
-                                    step: "250",
+                                    step: "100",
                                     value: displayTimeBase,
                                     onChange: (e) => setDisplayTimeBase(Number(e.target.value)),
                                     className: "w-full"
@@ -420,7 +497,7 @@
                                 React.createElement('label', {
                                     key: 'display-var-label',
                                     className: "block text-sm font-medium mb-2"
-                                }, `Display Variation: ±${(displayVariation / 1000).toFixed(1)}s`),
+                                }, `${t.displayVariation}: ±${(displayVariation / 1000).toFixed(1)}s`),
                                 React.createElement('input', {
                                     key: 'display-var-input',
                                     type: "range",
@@ -442,7 +519,7 @@
                         React.createElement('h3', {
                             key: 'colors-title',
                             className: "text-lg font-semibold mb-3"
-                        }, "Color Settings"),
+                        }, t.colorSettings),
                         React.createElement('div', {
                             key: 'colors-grid',
                             className: "grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -453,11 +530,11 @@
                                 React.createElement('h4', {
                                     key: 'available-title',
                                     className: "font-medium mb-2"
-                                }, `Available Colors (${availableColors.length})`),
+                                }, `${t.availableColors} (${availableColors.length})`),
                                 React.createElement('div', {
                                     key: 'available-grid',
                                     className: "grid grid-cols-3 gap-2"
-                                }, allColors.map(({ color, name }) => 
+                                }, allColors.map(({ color, name, nl }) => 
                                     React.createElement('button', {
                                         key: color,
                                         onClick: () => toggleColorAvailable(color),
@@ -467,7 +544,7 @@
                                                 : 'border-gray-600 opacity-50'
                                         }`,
                                         style: { backgroundColor: color }
-                                    }, name)
+                                    }, language === 'nl' ? nl : name)
                                 ))
                             ]),
                             
@@ -479,12 +556,12 @@
                                     className: "font-medium mb-2 flex items-center gap-2"
                                 }, [
                                     React.createElement(CheckIcon, { key: 'check', size: 16, className: "text-green-400" }),
-                                    `Correct Colors (${correctColors.length})`
+                                    `${t.correctColors} (${correctColors.length})`
                                 ]),
                                 React.createElement('div', {
                                     key: 'correct-grid',
                                     className: "grid grid-cols-3 gap-2"
-                                }, allColors.filter(({ color }) => availableColors.includes(color)).map(({ color, name }) => 
+                                }, allColors.filter(({ color }) => availableColors.includes(color)).map(({ color, name, nl }) => 
                                     React.createElement('button', {
                                         key: color,
                                         onClick: () => toggleColorCorrect(color),
@@ -495,7 +572,7 @@
                                         }`,
                                         style: { backgroundColor: color }
                                     }, [
-                                        name,
+                                        language === 'nl' ? nl : name,
                                         correctColors.includes(color) && React.createElement(CheckIcon, {
                                             key: 'check-mark',
                                             size: 12,
@@ -527,15 +604,15 @@
                         React.createElement('h2', {
                             key: 'title',
                             className: "text-3xl font-bold mb-4"
-                        }, "Advanced Color Flash Game"),
+                        }, t.title),
                         React.createElement('p', {
                             key: 'description',
                             className: "text-gray-400 max-w-md mb-4"
-                        }, "Tap only the \"correct\" colors. Avoid \"wrong\" colors. Configure timing variation and color rules in settings."),
+                        }, t.description),
                         availableColors.length === 0 && React.createElement('p', {
                             key: 'warning',
                             className: "text-red-400 text-sm"
-                        }, "Please select at least one available color in settings to start!")
+                        }, t.colorWarning)
                     ])
                 ]),
 
@@ -543,7 +620,7 @@
                 isPlaying && React.createElement('div', {
                     key: 'instructions',
                     className: "p-4 bg-gray-900 text-center text-sm text-gray-400"
-                }, "Tap only the correct colors - avoid wrong colors!")
+                }, t.instructions)
             ]);
         };
 
