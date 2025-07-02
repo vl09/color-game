@@ -1,23 +1,4 @@
-const pauseGame = () => {
-                setShowColor(false);
-                
-                if (gameIntervalRef.current) clearTimeout(gameIntervalRef.current);
-                if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
-                if (nextColorTimeoutRef.current) clearTimeout(nextColorTimeoutRef.current);
-            };
-
-            const toggleSettings = () => {
-                if (!showSettings) {
-                    // Opening settings
-                    if (isPlaying) {
-                        pauseGame();
-                    }
-                    setShowSettings(true);
-                } else {
-                    // Closing settings
-                    setShowSettings(false);
-                }
-            };<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -246,27 +227,6 @@ const pauseGame = () => {
                 return availableColors[Math.floor(Math.random() * availableColors.length)];
             };
             
-            const pauseGame = () => {
-                setShowColor(false);
-                
-                if (gameIntervalRef.current) clearTimeout(gameIntervalRef.current);
-                if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
-                if (nextColorTimeoutRef.current) clearTimeout(nextColorTimeoutRef.current);
-            };
-
-            const toggleSettings = () => {
-                if (!showSettings) {
-                    // Opening settings
-                    if (isPlaying) {
-                        pauseGame();
-                    }
-                    setShowSettings(true);
-                } else {
-                    // Closing settings
-                    setShowSettings(false);
-                }
-            };
-            
             const showNewColor = () => {
                 const newColor = getRandomColor();
                 const isCorrect = correctColors.includes(newColor);
@@ -300,7 +260,6 @@ const pauseGame = () => {
                 setScore(0);
                 setMissed(0);
                 setWrongTaps(0);
-                setShowSettings(false); // Close settings when starting game
                 
                 setTimeout(() => {
                     showNewColor();
@@ -409,7 +368,7 @@ const pauseGame = () => {
                     }, [
                         React.createElement('button', {
                             key: 'settings',
-                            onClick: toggleSettings,
+                            onClick: () => setShowSettings(!showSettings),
                             className: "p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
                         }, React.createElement(SettingsIcon)),
                         React.createElement('button', {
