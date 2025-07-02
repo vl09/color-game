@@ -562,16 +562,28 @@
                                     React.createElement('button', {
                                         key: color,
                                         onClick: () => toggleColorAvailable(color),
-                                        className: `p-2 rounded-lg border-2 text-xs transition-all ${
+                                        className: `p-2 rounded-lg border-2 text-xs transition-all relative ${
                                             availableColors.includes(color)
-                                                ? 'border-white opacity-100'
+                                                ? 'border-white opacity-100 shadow-lg'
                                                 : 'border-gray-600 opacity-50'
                                         }`,
                                         style: { 
                                             backgroundColor: color,
                                             color: textColor
                                         }
-                                    }, language === 'nl' ? nl : name)
+                                    }, [
+                                        language === 'nl' ? nl : name,
+                                        availableColors.includes(color) && React.createElement('div', {
+                                            key: 'selected-indicator',
+                                            className: `absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 ${
+                                                textColor === 'black' ? 'bg-white border-gray-800' : 'bg-gray-800 border-white'
+                                            } flex items-center justify-center`
+                                        }, React.createElement('div', {
+                                            className: `w-2 h-2 rounded-full ${
+                                                textColor === 'black' ? 'bg-blue-600' : 'bg-blue-400'
+                                            }`
+                                        }))
+                                    ])
                                 ))
                             ]),
                             
@@ -594,7 +606,7 @@
                                         onClick: () => toggleColorCorrect(color),
                                         className: `p-2 rounded-lg border-2 text-xs transition-all relative ${
                                             correctColors.includes(color)
-                                                ? 'border-green-400'
+                                                ? 'border-green-400 shadow-lg'
                                                 : 'border-gray-600 opacity-70'
                                         }`,
                                         style: { 
@@ -603,13 +615,16 @@
                                         }
                                     }, [
                                         language === 'nl' ? nl : name,
-                                        correctColors.includes(color) && React.createElement(CheckIcon, {
+                                        correctColors.includes(color) && React.createElement('div', {
+                                            key: 'check-container',
+                                            className: `absolute -top-1 -right-1 w-4 h-4 rounded-full ${
+                                                textColor === 'black' ? 'bg-green-600' : 'bg-green-400'
+                                            } flex items-center justify-center`
+                                        }, React.createElement(CheckIcon, {
                                             key: 'check-mark',
-                                            size: 12,
-                                            className: `absolute top-0 right-0 rounded-full ${
-                                                textColor === 'black' ? 'text-green-600 bg-white' : 'text-green-400 bg-black'
-                                            }`
-                                        })
+                                            size: 10,
+                                            className: "text-white"
+                                        }))
                                     ])
                                 ))
                             ])
