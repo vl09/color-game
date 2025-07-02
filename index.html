@@ -209,7 +209,7 @@
             const [language, setLanguage] = useState(() => getCookie('colorGameLanguage') || 'nl');
             const [intervalTimeBase, setIntervalTimeBase] = useState(() => getCookie('colorGameIntervalBase') || 1500);
             const [intervalVariation, setIntervalVariation] = useState(() => getCookie('colorGameIntervalVar') || 500);
-            const [displayTimeBase, setDisplayTimeBase] = useState(() => getCookie('colorGameDisplayBase') || 1200);
+            const [displayTimeBase, setDisplayTimeBase] = useState(() => getCookie('colorGameDisplayBase') || 1800);
             const [displayVariation, setDisplayVariation] = useState(() => getCookie('colorGameDisplayVar') || 300);
             const [availableColors, setAvailableColors] = useState(() => 
                 getCookie('colorGameAvailable') || ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
@@ -238,20 +238,24 @@
                     const audioContext = createAudioContext();
 
                     if (type === 'correct') {
-                        // Short sharp beep for correct
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
+                        // Two ascending sharp beeps for correct (more affirmative)
+                        const frequencies = [700, 900]; // Low to high
+                        for (let i = 0; i < 2; i++) {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
 
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
 
-                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                        oscillator.type = 'square';
-                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                            const startTime = audioContext.currentTime + (i * 0.12);
+                            oscillator.frequency.setValueAtTime(frequencies[i], startTime);
+                            oscillator.type = 'square';
+                            gainNode.gain.setValueAtTime(0.2, startTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.1);
 
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.1);
+                            oscillator.start(startTime);
+                            oscillator.stop(startTime + 0.1);
+                        }
 
                     } else if (type === 'wrong') {
                         // Two short sharp beeps for wrong
@@ -273,21 +277,22 @@
                         }
 
                     } else if (type === 'miss') {
-                        // Longer beep for missed
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
+                    // Continuous descending tone for missed (sad slide sound)
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
 
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
 
-                        oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
-                        oscillator.type = 'square';
-                        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.4);
+                    oscillator.type = 'square';
+                    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
 
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.5);
-                    }
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                }
 
                 } catch (error) {
                     console.log('Audio not supported or blocked');
