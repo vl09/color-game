@@ -169,17 +169,21 @@
                     baseDisplayTime: "Base Display Time", 
                     displayVariation: "Display Variation",
                     availableColors: "Available Colors",
-                    correctColors: "Correct Colors"
+                    correctColors: "Correct Colors",
+                    baseIntervalDesc: "Average time between colors",
+                    intervalVariationDesc: "Random variation in timing", 
+                    baseDisplayTimeDesc: "How long colors stay visible",
+                    displayVariationDesc: "Random variation in display time"
                 },
                 nl: {
-                    title: "Geavanceerd Kleurflits Spel",
+                    title: "Kleurenflitsspel",
                     description: "Tik alleen op de \"juiste\" kleuren. Vermijd \"foute\" kleuren. Configureer timing variatie en kleurregels in instellingen.",
                     instructions: "Tik alleen op de juiste kleuren - vermijd foute kleuren!",
                     correct: "Juist",
                     missed: "Gemist",
                     wrong: "Fout", 
                     colorWarning: "Selecteer ten minste één beschikbare kleur in instellingen om te starten!",
-                    timingSettings: "Timing Instellingen",
+                    timingSettings: "Instellingen",
                     colorSettings: "Kleur Instellingen",
                     language: "Taal",
                     baseInterval: "Basis Interval",
@@ -187,7 +191,11 @@
                     baseDisplayTime: "Basis Weergavetijd",
                     displayVariation: "Weergave Variatie", 
                     availableColors: "Beschikbare Kleuren",
-                    correctColors: "Juiste Kleuren"
+                    correctColors: "Juiste Kleuren",
+                    baseIntervalDesc: "Gemiddelde tijd tussen kleuren",
+                    intervalVariationDesc: "Willekeurige variatie in timing",
+                    baseDisplayTimeDesc: "Hoe lang kleuren zichtbaar blijven",
+                    displayVariationDesc: "Willekeurige variatie in weergavetijd"
                 }
             };
 
@@ -404,21 +412,21 @@
                             React.createElement('button', {
                                 key: 'en',
                                 onClick: () => setLanguage('en'),
-                                className: `px-4 py-2 rounded-lg transition-colors ${
+                                className: `px-4 py-2 rounded-lg transition-colors text-2xl ${
                                     language === 'en' 
-                                        ? 'bg-blue-600 text-white' 
-                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                        ? 'bg-blue-600 border-2 border-blue-400' 
+                                        : 'bg-gray-700 hover:bg-gray-600 border-2 border-transparent'
                                 }`
-                            }, 'English'),
+                            }, '🇬🇧'),
                             React.createElement('button', {
                                 key: 'nl',
                                 onClick: () => setLanguage('nl'),
-                                className: `px-4 py-2 rounded-lg transition-colors ${
+                                className: `px-4 py-2 rounded-lg transition-colors text-2xl ${
                                     language === 'nl' 
-                                        ? 'bg-blue-600 text-white' 
-                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                        ? 'bg-blue-600 border-2 border-blue-400' 
+                                        : 'bg-gray-700 hover:bg-gray-600 border-2 border-transparent'
                                 }`
-                            }, 'Nederlands')
+                            }, '🇳🇱')
                         ])
                     ]),
 
@@ -439,8 +447,12 @@
                             }, [
                                 React.createElement('label', {
                                     key: 'interval-label',
-                                    className: "block text-sm font-medium mb-2"
+                                    className: "block text-sm font-medium mb-1"
                                 }, `${t.baseInterval}: ${(intervalTimeBase / 1000).toFixed(1)}s`),
+                                React.createElement('p', {
+                                    key: 'interval-desc',
+                                    className: "text-xs text-gray-400 mb-2"
+                                }, t.baseIntervalDesc),
                                 React.createElement('input', {
                                     key: 'interval-input',
                                     type: "range",
@@ -458,8 +470,12 @@
                             }, [
                                 React.createElement('label', {
                                     key: 'interval-var-label',
-                                    className: "block text-sm font-medium mb-2"
+                                    className: "block text-sm font-medium mb-1"
                                 }, `${t.intervalVariation}: ±${(intervalVariation / 1000).toFixed(1)}s`),
+                                React.createElement('p', {
+                                    key: 'interval-var-desc',
+                                    className: "text-xs text-gray-400 mb-2"
+                                }, t.intervalVariationDesc),
                                 React.createElement('input', {
                                     key: 'interval-var-input',
                                     type: "range",
@@ -477,8 +493,12 @@
                             }, [
                                 React.createElement('label', {
                                     key: 'display-label',
-                                    className: "block text-sm font-medium mb-2"
+                                    className: "block text-sm font-medium mb-1"
                                 }, `${t.baseDisplayTime}: ${(displayTimeBase / 1000).toFixed(1)}s`),
+                                React.createElement('p', {
+                                    key: 'display-desc',
+                                    className: "text-xs text-gray-400 mb-2"
+                                }, t.baseDisplayTimeDesc),
                                 React.createElement('input', {
                                     key: 'display-input',
                                     type: "range",
@@ -496,8 +516,12 @@
                             }, [
                                 React.createElement('label', {
                                     key: 'display-var-label',
-                                    className: "block text-sm font-medium mb-2"
+                                    className: "block text-sm font-medium mb-1"
                                 }, `${t.displayVariation}: ±${(displayVariation / 1000).toFixed(1)}s`),
+                                React.createElement('p', {
+                                    key: 'display-var-desc',
+                                    className: "text-xs text-gray-400 mb-2"
+                                }, t.displayVariationDesc),
                                 React.createElement('input', {
                                     key: 'display-var-input',
                                     type: "range",
