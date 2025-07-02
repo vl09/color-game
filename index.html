@@ -1,4 +1,23 @@
-<!DOCTYPE html>
+const pauseGame = () => {
+                setShowColor(false);
+                
+                if (gameIntervalRef.current) clearTimeout(gameIntervalRef.current);
+                if (colorTimeoutRef.current) clearTimeout(colorTimeoutRef.current);
+                if (nextColorTimeoutRef.current) clearTimeout(nextColorTimeoutRef.current);
+            };
+
+            const toggleSettings = () => {
+                if (!showSettings) {
+                    // Opening settings
+                    if (isPlaying) {
+                        pauseGame();
+                    }
+                    setShowSettings(true);
+                } else {
+                    // Closing settings
+                    setShowSettings(false);
+                }
+            };<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -260,6 +279,7 @@
                 setScore(0);
                 setMissed(0);
                 setWrongTaps(0);
+                setShowSettings(false); // Close settings when starting game
                 
                 setTimeout(() => {
                     showNewColor();
@@ -368,7 +388,7 @@
                     }, [
                         React.createElement('button', {
                             key: 'settings',
-                            onClick: () => setShowSettings(!showSettings),
+                            onClick: toggleSettings,
                             className: "p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
                         }, React.createElement(SettingsIcon)),
                         React.createElement('button', {
