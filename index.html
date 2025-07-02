@@ -743,7 +743,8 @@
                 // Credit
                 !isPlaying ? React.createElement('div', {
                     key: 'signature',
-                    className: "absolute bottom-4 left-0 right-0 text-center text-xs text-gray-500 opacity-60"
+                    className: "fixed bottom-4 left-0 right-0 text-center text-xs text-gray-500 opacity-60 z-10",
+                    style: { paddingBottom: 'env(safe-area-inset-bottom, 0px)' }
                 }, "© 2025 Valentijn Leenaers") : null
             ]);
 
