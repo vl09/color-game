@@ -721,7 +721,7 @@
                     className: "w-64 h-64 rounded-full shadow-2xl transform transition-all duration-300 scale-100 hover:scale-105",
                     style: { backgroundColor: currentColor }
                 }) : null,
-                
+
                 !isPlaying ? React.createElement('div', {
                     key: 'welcome',
                     className: "text-center"
@@ -732,13 +732,19 @@
                     }, t.title),
                     React.createElement('p', {
                         key: 'description',
-                        className: "text-gray-400 max-w-md mb-4"
+                        className: "text-gray-400 max-w-md mb-4 mx-auto"
                     }, t.description),
                     availableColors.length === 0 ? React.createElement('p', {
                         key: 'warning',
                         className: "text-red-400 text-sm"
                     }, t.colorWarning) : null
-                ]) : null
+                ]) : null,
+
+                // Credit
+                !isPlaying ? React.createElement('div', {
+                    key: 'signature',
+                    className: "absolute bottom-4 left-0 right-0 text-center text-xs text-gray-500 opacity-60"
+                }, "© 2025 Valentijn Leenaers") : null
             ]);
 
             // Instructions
