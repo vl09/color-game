@@ -11,8 +11,8 @@
         body {
             margin: 0;
             padding: 0;
+            overflow: hidden;
             font-family: system-ui, -apple-system, sans-serif;
-            background-color: #111827; /* bg-gray-900 */
         }
 
         * {
@@ -24,6 +24,8 @@
         html, body {
             height: 100%;
             width: 100%;
+            position: fixed;
+            overflow: hidden;
         }
 
         #root {
@@ -517,78 +519,277 @@
             ]);
 
             const settingsPanel = showSettings ? React.createElement('div', {
-                className: "absolute inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center p-4",
-                onClick: toggleSettings
+                className: "absolute inset-0 bg-gray-800 z-50 overflow-y-auto",
+                style: { 
+                    height: '100vh',
+                    width: '100vw',
+                    top: 0,
+                    left: 0
+                }
             }, React.createElement('div', {
-                className: "bg-gray-800 text-white rounded-xl shadow-2xl w-full max-w-4xl m-4 z-50 max-h-[90vh] overflow-y-auto [-webkit-overflow-scrolling:touch]",
-                onClick: e => e.stopPropagation()
-            }, React.createElement('div', { className: "p-6 space-y-6" }, [
-                React.createElement('div', { key: 'stitle', className: 'flex justify-between items-center pb-4 border-b border-gray-700' }, [
-                    React.createElement('h2', { className: 'text-2xl font-bold text-white' }, t.settingsTitle),
-                    React.createElement('button', { onClick: toggleSettings, className: 'p-2 rounded-full hover:bg-gray-700' }, React.createElement(XIcon))
-                ]),
+                className: "min-h-full p-4"
+            }, React.createElement('div', {
+                className: "max-w-4xl mx-auto space-y-6 pb-24"
+            }, [
+                // Settings title
+                React.createElement('h2', {
+                    key: 'settings-title',
+                    className: "text-2xl font-bold text-center mb-6 text-white border-b border-gray-600 pb-4"
+                }, t.settingsTitle),
+
                 // Language section
-                React.createElement('div', { key: 'language-section' }, [
-                    React.createElement('h3', { className: "text-lg font-semibold mb-3 text-gray-200" }, t.language),
-                    React.createElement('div', { className: "flex gap-2" }, [
-                        React.createElement('button', { key: 'nl-btn', onClick: () => setLanguage('nl'), className: `px-4 py-2 rounded-lg transition-colors text-2xl ${language === 'nl' ? 'bg-blue-600 ring-2 ring-blue-400' : 'bg-gray-700 hover:bg-gray-600'}` }, '🇳🇱'),
-                        React.createElement('button', { key: 'en-btn', onClick: () => setLanguage('en'), className: `px-4 py-2 rounded-lg transition-colors text-2xl ${language === 'en' ? 'bg-blue-600 ring-2 ring-blue-400' : 'bg-gray-700 hover:bg-gray-600'}` }, '🇬🇧')
+                React.createElement('div', {
+                    key: 'language-section'
+                }, [
+                    React.createElement('h3', {
+                        key: 'language-title',
+                        className: "text-lg font-semibold mb-3"
+                    }, t.language),
+                    React.createElement('div', {
+                        key: 'language-buttons',
+                        className: "flex gap-2"
+                    }, [
+                        React.createElement('button', {
+                            key: 'nl-btn',
+                            onClick: () => setLanguage('nl'),
+                            className: `px-4 py-2 rounded-lg transition-colors text-2xl ${
+                                language === 'nl' 
+                                    ? 'bg-blue-600 border-2 border-blue-400' 
+                                    : 'bg-gray-700 hover:bg-gray-600 border-2 border-transparent'
+                            }`
+                        }, '🇳🇱'),
+                        React.createElement('button', {
+                            key: 'en-btn',
+                            onClick: () => setLanguage('en'),
+                            className: `px-4 py-2 rounded-lg transition-colors text-2xl ${
+                                language === 'en' 
+                                    ? 'bg-blue-600 border-2 border-blue-400' 
+                                    : 'bg-gray-700 hover:bg-gray-600 border-2 border-transparent'
+                            }`
+                        }, '🇬🇧')
                     ])
                 ]),
+
                 // Timing section
-                React.createElement('div', { key: 'timing-section' }, [
-                    React.createElement('h3', { className: "text-lg font-semibold mb-3 text-gray-200" }, t.timingSettings),
-                    React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, [
-                        React.createElement('div', {}, [
-                            React.createElement('label', { className: "block text-sm font-medium mb-1" }, `${t.baseInterval}: ${(intervalTimeBase / 1000).toFixed(1)}s`),
-                            React.createElement('p', { className: "text-xs text-gray-400 mb-2" }, t.baseIntervalDesc),
-                            React.createElement('input', { type: "range", min: "500", max: "10000", step: "100", value: intervalTimeBase, onChange: (e) => setIntervalTimeBase(Number(e.target.value)), className: "w-full" })
+                React.createElement('div', {
+                    key: 'timing-section'
+                }, [
+                    React.createElement('h3', {
+                        key: 'timing-title',
+                        className: "text-lg font-semibold mb-3"
+                    }, t.timingSettings),
+                    React.createElement('div', {
+                        key: 'timing-grid',
+                        className: "grid grid-cols-1 md:grid-cols-2 gap-4"
+                    }, [
+                        React.createElement('div', {
+                            key: 'interval-base-control'
+                        }, [
+                            React.createElement('label', {
+                                key: 'interval-base-label',
+                                className: "block text-sm font-medium mb-1"
+                            }, `${t.baseInterval}: ${(intervalTimeBase / 1000).toFixed(1)}s`),
+                            React.createElement('p', {
+                                key: 'interval-base-desc',
+                                className: "text-xs text-gray-400 mb-2"
+                            }, t.baseIntervalDesc),
+                            React.createElement('input', {
+                                key: 'interval-base-input',
+                                type: "range",
+                                min: "500",
+                                max: "10000",
+                                step: "100",
+                                value: intervalTimeBase,
+                                onChange: (e) => setIntervalTimeBase(Number(e.target.value)),
+                                className: "w-full"
+                            })
                         ]),
-                        React.createElement('div', {}, [
-                            React.createElement('label', { className: "block text-sm font-medium mb-1" }, `${t.intervalVariation}: ±${(intervalVariation / 1000).toFixed(1)}s`),
-                            React.createElement('p', { className: "text-xs text-gray-400 mb-2" }, t.intervalVariationDesc),
-                            React.createElement('input', { type: "range", min: "0", max: "3000", step: "100", value: intervalVariation, onChange: (e) => setIntervalVariation(Number(e.target.value)), className: "w-full" })
+                        
+                        React.createElement('div', {
+                            key: 'interval-var-control'
+                        }, [
+                            React.createElement('label', {
+                                key: 'interval-var-label',
+                                className: "block text-sm font-medium mb-1"
+                            }, `${t.intervalVariation}: ±${(intervalVariation / 1000).toFixed(1)}s`),
+                            React.createElement('p', {
+                                key: 'interval-var-desc',
+                                className: "text-xs text-gray-400 mb-2"
+                            }, t.intervalVariationDesc),
+                            React.createElement('input', {
+                                key: 'interval-var-input',
+                                type: "range",
+                                min: "0",
+                                max: "3000",
+                                step: "100",
+                                value: intervalVariation,
+                                onChange: (e) => setIntervalVariation(Number(e.target.value)),
+                                className: "w-full"
+                            })
                         ]),
-                        React.createElement('div', {}, [
-                            React.createElement('label', { className: "block text-sm font-medium mb-1" }, `${t.baseDisplayTime}: ${(displayTimeBase / 1000).toFixed(1)}s`),
-                            React.createElement('p', { className: "text-xs text-gray-400 mb-2" }, t.baseDisplayTimeDesc),
-                            React.createElement('input', { type: "range", min: "300", max: "5000", step: "100", value: displayTimeBase, onChange: (e) => setDisplayTimeBase(Number(e.target.value)), className: "w-full" })
+                        
+                        React.createElement('div', {
+                            key: 'display-base-control'
+                        }, [
+                            React.createElement('label', {
+                                key: 'display-base-label',
+                                className: "block text-sm font-medium mb-1"
+                            }, `${t.baseDisplayTime}: ${(displayTimeBase / 1000).toFixed(1)}s`),
+                            React.createElement('p', {
+                                key: 'display-base-desc',
+                                className: "text-xs text-gray-400 mb-2"
+                            }, t.baseDisplayTimeDesc),
+                            React.createElement('input', {
+                                key: 'display-base-input',
+                                type: "range",
+                                min: "300",
+                                max: "5000",
+                                step: "100",
+                                value: displayTimeBase,
+                                onChange: (e) => setDisplayTimeBase(Number(e.target.value)),
+                                className: "w-full"
+                            })
                         ]),
-                        React.createElement('div', {}, [
-                            React.createElement('label', { className: "block text-sm font-medium mb-1" }, `${t.displayVariation}: ±${(displayVariation / 1000).toFixed(1)}s`),
-                            React.createElement('p', { className: "text-xs text-gray-400 mb-2" }, t.displayVariationDesc),
-                            React.createElement('input', { type: "range", min: "0", max: "2000", step: "100", value: displayVariation, onChange: (e) => setDisplayVariation(Number(e.target.value)), className: "w-full" })
+                        
+                        React.createElement('div', {
+                            key: 'display-var-control'
+                        }, [
+                            React.createElement('label', {
+                                key: 'display-var-label',
+                                className: "block text-sm font-medium mb-1"
+                            }, `${t.displayVariation}: ±${(displayVariation / 1000).toFixed(1)}s`),
+                            React.createElement('p', {
+                                key: 'display-var-desc',
+                                className: "text-xs text-gray-400 mb-2"
+                            }, t.displayVariationDesc),
+                            React.createElement('input', {
+                                key: 'display-var-input',
+                                type: "range",
+                                min: "0",
+                                max: "2000",
+                                step: "100",
+                                value: displayVariation,
+                                onChange: (e) => setDisplayVariation(Number(e.target.value)),
+                                className: "w-full"
+                            })
                         ])
                     ])
                 ]),
+
                 // Color section
-                React.createElement('div', { key: 'color-section' }, [
-                    React.createElement('h3', { className: "text-lg font-semibold mb-3 text-gray-200" }, t.colorSettings),
-                    React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-6" }, [
-                        React.createElement('div', {}, [
-                            React.createElement('h4', { className: "font-medium mb-2" }, `${t.availableColors} (${availableColors.length})`),
-                            React.createElement('div', { className: "grid grid-cols-3 gap-2" }, allColors.map(({ color, name, nl, textColor }) => {
+                React.createElement('div', {
+                    key: 'color-section'
+                }, [
+                    React.createElement('h3', {
+                        key: 'color-title',
+                        className: "text-lg font-semibold mb-3"
+                    }, t.colorSettings),
+                    React.createElement('div', {
+                        key: 'color-grid',
+                        className: "grid grid-cols-1 md:grid-cols-2 gap-6"
+                    }, [
+                        React.createElement('div', {
+                            key: 'available-section'
+                        }, [
+                            React.createElement('h4', {
+                                key: 'available-title',
+                                className: "font-medium mb-2"
+                            }, `${t.availableColors} (${availableColors.length})`),
+                            React.createElement('div', {
+                                key: 'available-grid',
+                                className: "grid grid-cols-3 gap-2"
+                            }, allColors.map(({ color, name, nl, textColor }) => {
                                 const isSelected = availableColors.includes(color);
                                 return React.createElement('button', {
-                                    key: `available-${color}`, onClick: () => toggleColorAvailable(color),
-                                    className: `p-2 rounded-lg border-2 text-xs transition-all relative ${isSelected ? 'border-white opacity-100 shadow-lg' : 'border-gray-600 opacity-50'}`,
-                                    style: { backgroundColor: color, color: textColor }
-                                }, language === 'nl' ? nl : name);
+                                    key: `available-${color}`,
+                                    onClick: () => toggleColorAvailable(color),
+                                    className: `p-2 rounded-lg border-2 text-xs transition-all relative ${
+                                        isSelected
+                                            ? 'border-white opacity-100 shadow-lg'
+                                            : 'border-gray-600 opacity-50'
+                                    }`,
+                                    style: { 
+                                        backgroundColor: color,
+                                        color: textColor
+                                    }
+                                }, [
+                                    language === 'nl' ? nl : name,
+                                    isSelected ? React.createElement('div', {
+                                        key: 'indicator',
+                                        className: `absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 ${
+                                            textColor === 'black' ? 'bg-white border-gray-800' : 'bg-gray-800 border-white'
+                                        } flex items-center justify-center`
+                                    }, React.createElement('div', {
+                                        key: 'dot',
+                                        className: `w-2 h-2 rounded-full ${
+                                            textColor === 'black' ? 'bg-blue-600' : 'bg-blue-400'
+                                        }`
+                                    })) : null
+                                ]);
                             }))
                         ]),
-                        React.createElement('div', {}, [
-                            React.createElement('h4', { className: "font-medium mb-2 flex items-center gap-2" }, [React.createElement(CheckIcon, { key: 'check-icon', size: 16, className: "text-green-400" }), `${t.correctColors} (${correctColors.length})`]),
-                            React.createElement('div', { className: "grid grid-cols-3 gap-2" }, allColors.filter(({ color }) => availableColors.includes(color)).map(({ color, name, nl, textColor }) => {
+                        
+                        React.createElement('div', {
+                            key: 'correct-section'
+                        }, [
+                            React.createElement('h4', {
+                                key: 'correct-title',
+                                className: "font-medium mb-2 flex items-center gap-2"
+                            }, [
+                                React.createElement(CheckIcon, { 
+                                    key: 'check-icon', 
+                                    size: 16, 
+                                    className: "text-green-400" 
+                                }),
+                                `${t.correctColors} (${correctColors.length})`
+                            ]),
+                            React.createElement('div', {
+                                key: 'correct-grid',
+                                className: "grid grid-cols-3 gap-2"
+                            }, allColors.filter(({ color }) => availableColors.includes(color)).map(({ color, name, nl, textColor }) => {
                                 const isCorrect = correctColors.includes(color);
                                 return React.createElement('button', {
-                                    key: `correct-${color}`, onClick: () => toggleColorCorrect(color),
-                                    className: `p-2 rounded-lg border-2 text-xs transition-all relative ${isCorrect ? 'border-green-400 shadow-lg ring-2 ring-green-400' : 'border-gray-600 opacity-70'}`,
-                                    style: { backgroundColor: color, color: textColor }
-                                }, language === 'nl' ? nl : name);
+                                    key: `correct-${color}`,
+                                    onClick: () => toggleColorCorrect(color),
+                                    className: `p-2 rounded-lg border-2 text-xs transition-all relative ${
+                                        isCorrect
+                                            ? 'border-green-400 shadow-lg'
+                                            : 'border-gray-600 opacity-70'
+                                    }`,
+                                    style: { 
+                                        backgroundColor: color,
+                                        color: textColor
+                                    }
+                                }, [
+                                    language === 'nl' ? nl : name,
+                                    isCorrect ? React.createElement('div', {
+                                        key: 'check-indicator',
+                                        className: `absolute -top-1 -right-1 w-4 h-4 rounded-full ${
+                                            textColor === 'black' ? 'bg-green-600' : 'bg-green-400'
+                                        } flex items-center justify-center`
+                                    }, React.createElement(CheckIcon, {
+                                        key: 'check-mark',
+                                        size: 10,
+                                        className: "text-white"
+                                    })) : null
+                                ]);
                             }))
                         ])
                     ])
-                ])
+                ]),
+
+                // Close button
+                React.createElement('div', {
+                    key: 'close-section',
+                    className: "flex justify-end pt-4 border-t border-gray-700"
+                },                 React.createElement('button', {
+                    key: 'close-btn',
+                    onClick: toggleSettings,
+                    className: "px-6 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
+                }, [
+                    React.createElement(XIcon, { key: 'close-icon' }),
+                    t.closeSettings
+                ]))
             ]))) : null;
 
             const gameArea = React.createElement('div', {
