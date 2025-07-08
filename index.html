@@ -232,12 +232,22 @@
             const audioContextRef = useRef(null);
 
             const createAudioContext = () => {
+                // If the existing context was closed, discard it so a new one can be made.
+                if (audioContextRef.current && audioContextRef.current.state === 'closed') {
+                    audioContextRef.current = null;
+                }
+
+                // If there's no context, create one.
                 if (!audioContextRef.current) {
                     audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                if (audioContextRef.current.state === 'suspended') {
+
+                // If the context is not running, try to resume it.
+                // This handles cases where the browser suspended it due to inactivity.
+                if (audioContextRef.current.state !== 'running') {
                     audioContextRef.current.resume();
                 }
+
                 return audioContextRef.current;
             };
             
