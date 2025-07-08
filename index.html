@@ -361,21 +361,27 @@
             const t = translations[language];
             
             useEffect(() => {
+                let lastTouchEnd = 0;
                 const preventDefault = (e) => {
-                    e.preventDefault();
+                    const now = new Date().getTime();
+                    if (now - lastTouchEnd <= 300) {
+                        e.preventDefault();
+                    }
+                    lastTouchEnd = now;
                 };
-                document.addEventListener('touchmove', preventDefault, { passive: false });
+                document.addEventListener('touchend', preventDefault, false);
                 
+                // Add spacebar functionality
                 const handleKeyPress = (e) => {
                     if (e.code === 'Space' || e.key === ' ') {
-                        e.preventDefault();
+                        e.preventDefault(); // Prevent page scroll
                         handleColorTap();
                     }
                 };
                 document.addEventListener('keydown', handleKeyPress);
                 
                 return () => {
-                    document.removeEventListener('touchmove', preventDefault, false);
+                    document.removeEventListener('touchend', preventDefault, false);
                     document.removeEventListener('keydown', handleKeyPress);
                 };
             }, [showColor, isPlaying, isCorrectColor]);
