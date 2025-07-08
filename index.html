@@ -479,7 +479,7 @@
             const headerElement = React.createElement('div', {
                 className: "p-4 bg-gray-900 flex justify-between items-center border-b border-gray-700"
             }, [
-                React.createElement('div', { key: 'scores', className: "flex gap-4 sm:gap-6 items-center text-lg" }, [
+                React.createElement('div', { key: 'scores', className: "flex gap-4 sm:gap-6 items-center text-base sm:text-lg" }, [
                     React.createElement('div', { key: 'correct' }, [React.createElement('span', { className: "font-bold text-green-400" }, `${t.correct}: `), `${score}`]),
                     React.createElement('div', { key: 'missed' }, [React.createElement('span', { className: "font-bold text-orange-400" }, `${t.missed}: `), `${missed}`]),
                     React.createElement('div', { key: 'wrong' }, [React.createElement('span', { className: "font-bold text-red-400" }, `${t.wrong}: `), `${wrongTaps}`])
